@@ -13,6 +13,8 @@
 // 'task': a task to be executed within a workflow node
 // 'job': a concrete execution of the task (a task could have multiple jobs/retries)
 
+process.on('exit', function() { console.trace("EXIT STACKTRACE"); });
+
 const redis = require('redis');
 var handleJob = require('./handler').handleJob;
 var docopt = require('docopt').docopt;
