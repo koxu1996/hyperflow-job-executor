@@ -29,16 +29,17 @@ console.log("Job executor will execute tasks:", tasks.join(" "));
 var redisUrl = opts['<redisUrl>'];
 var rcl = redis.createClient(redisUrl);
 
-// Execute tasks 
-async function executeTask(idx) {
-    if (idx < tasks.length) {
-        let jobExitCode = await handleJob(tasks[idx], rcl);
-        console.log("Task", tasks[idx], "job exit code:", jobExitCode);
-        executeTask(idx+1);
-    } else {
-        // No more tasks to handle; stop redis client
-        rcl.quit();
+// Execute tasks
+async function executeTask(tasks) {
+    for (let i=0; i<tasks.length; i++) {
+        console.log("Executing task", tasks[i]);
+        let jobExitCode = await handleJob(tasks[i], rcl);
+        console.log("Task", tasks[i], "job exit code:", jobExitCode);
     }
+    // No more tasks to handle; stop redis client
+    rcl.quit();
+    return;
 }
 
-executeTask(0);
+executeTask(tasks);
+console.log("Job executor finished");
