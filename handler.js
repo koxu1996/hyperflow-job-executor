@@ -154,7 +154,18 @@ async function handleJob(taskId, rcl) {
             var stdoutStream, stderrStream;
 
             numRetries--;
-            const cmd = spawn(jm["executable"], jm["args"]);
+
+            const enableResourceStats = process.env.HF_VAR_ENABLE_RES_STATS == "1";
+            let executable = jm["executable"];
+            let args = jm["args"];
+            if (enableResourceStats) {
+                var workDir = process.cwd();
+                let logDir = process.env.HF_VAR_LOG_DIR || (workDir + "/logs-hf");
+                let resLogFile = logDir + '/task-' + taskId.replace(/:/g, '__') + '@' + handlerId + '__res.log';
+                args = ["-o", resLogFile, "-v", executable].concat(args);
+                executable = "/usr/bin/time"
+            }
+            const cmd = spawn(executable, args);
             let targetPid = cmd.pid;
             cmd.stdout.pipe(stdoutLog);
             cmd.stderr.pipe(stderrLog);
